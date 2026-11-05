@@ -91,6 +91,11 @@ fi
 
 stable=$(version_of manifest.json)
 candidate=$(version_of manifest-rc.json)
+# Publishing the same tag again changes no manifest, so it must not retire the previous folders early.
+if [ "$stable" = "$previous_stable" ] && [ "$candidate" = "$previous_candidate" ]; then
+  echo "stable: ${stable:-none}, test build: ${candidate:-none} (unchanged, nothing pruned)"
+  exit 0
+fi
 for dir in firmware/*/; do
   name=$(basename "$dir")
   [[ $name =~ $tag_re ]] || continue

@@ -15,7 +15,10 @@ The web flasher serves CrossMono's full image from this site, so the browser loa
 - Publishing a final release clears `manifest-rc.json` when its candidate is for that release or an older one.
 - A publish keeps the folders that the two manifests point at, and the ones they pointed at before it; it deletes
   the rest. GitHub Pages and its CDN cache files for 10 minutes, so a cached old manifest can still point at the
-  previous folder for a while. Older versions stay on the GitHub releases.
+  previous folder for a while. Publishing the same tag again deletes nothing. Leave 10 minutes between publishes of
+  different tags. Older versions stay on the GitHub releases.
+- The page installs the manifest it has shown (as a `blob:` URL), so a page left open across a publish still
+  installs the version on its button.
 - Deleted folders stay in the git history: each publish adds about 5.4 MB to the repository.
 
 Do not edit these files by hand. The `publish-firmware` workflow writes them:

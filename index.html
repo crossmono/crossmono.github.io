@@ -218,30 +218,37 @@
     const TAG = /^\d+\.\d+\.\d+(?:-rc\.[1-9]\d*)?$/;
     const $ = (id) => document.getElementById(id);
 
-    // The tag a manifest installs, or "" when its channel has no release yet. Throws when it cannot be read.
-    async function releaseTag(path, candidate) {
+    // A channel's release: its tag ("" when the channel has none yet) and the manifest text that was read.
+    // Throws when the manifest cannot be read.
+    async function readRelease(path, candidate) {
       const response = await fetch(path, { cache: "no-cache", signal: AbortSignal.timeout(15000) });
       if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
-      const manifest = await response.json();
+      const text = await response.text();
+      const manifest = JSON.parse(text);
       const tag = manifest.version;
       const usable = typeof tag === "string" && TAG.test(tag) && tag.includes("-rc.") === candidate &&
         manifest.builds?.[0]?.parts?.length > 0;
-      return usable ? tag : "";
+      return usable ? { tag, text } : { tag: "", text };
     }
 
-    function show(section, tag) {
-      section.querySelectorAll(".v").forEach((el) => { el.textContent = tag; });
-      section.querySelectorAll("a.notes").forEach((a) => { a.href = `${REPO}/releases/tag/${tag}`; });
+    function show(section, release) {
+      section.querySelectorAll(".v").forEach((el) => { el.textContent = release.tag; });
+      section.querySelectorAll("a.notes").forEach((a) => { a.href = `${REPO}/releases/tag/${release.tag}`; });
+      // Install exactly the manifest shown, even if the channel changes while the page is open. ESP Web Tools
+      // resolves the part paths of a blob: manifest against the page, where firmware/<tag>/ is.
+      const blob = new Blob([release.text], { type: "application/json" });
+      section.querySelector("esp-web-install-button").setAttribute("manifest", URL.createObjectURL(blob));
       section.hidden = false;
     }
 
-    const results = await Promise.allSettled([releaseTag("manifest.json", false), releaseTag("manifest-rc.json", true)]);
-    const [stable, candidate] = results.map((r) => (r.status === "fulfilled" ? r.value : ""));
+    const results = await Promise.allSettled([readRelease("manifest.json", false), readRelease("manifest-rc.json", true)]);
+    const [stableRelease, candidateRelease] = results.map((r) => (r.status === "fulfilled" ? r.value : { tag: "" }));
+    const [stable, candidate] = [stableRelease.tag, candidateRelease.tag];
     const failed = results.some((r) => r.status === "rejected");
     results.filter((r) => r.status === "rejected").forEach((r) => console.error(r.reason));
 
-    if (stable) show($("stable"), stable);
-    if (candidate) show($("rc"), candidate);
+    if (stable) show($("stable"), stableRelease);
+    if (candidate) show($("rc"), candidateRelease);
     if (failed) $("load-error").hidden = false;
     else if (!stable && !candidate) $("none").hidden = false;
 
