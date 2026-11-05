@@ -4,14 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CrossMono</title>
-  <meta name="description" content="CrossMono: reading-first community firmware for the M5Stack PaperMono and PaperMono-Lite. Pre-alpha, no release yet.">
+  <meta name="description" content="CrossMono: reading-first community firmware for the M5Stack PaperMono and PaperMono-Lite. Install it from the browser over USB.">
+  <!-- The firmware's placeholder logo (src/mono/images/logo.svg in nandanito/crossmono). -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='96' fill='%23000'/%3E%3Cpath d='M112 400V112h84l60 112 60-112h84v288h-72V248l-48 88h-48l-48-88v152Z' fill='%23fff'/%3E%3C/svg%3E">
   <style>
     :root {
       --bg: #f7f6f2;
       --fg: #1b1b1b;
       --muted: #5c5c5c;
       --rule: #d6d4cc;
+      --panel: #efede6;
       --link: #1b1b1b;
+      --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     }
     @media (prefers-color-scheme: dark) {
       :root {
@@ -19,10 +23,12 @@
         --fg: #ecebe6;
         --muted: #a3a29c;
         --rule: #3a3a37;
+        --panel: #202020;
         --link: #ecebe6;
       }
     }
     * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
     body {
       margin: 0;
       background: var(--bg);
@@ -30,26 +36,83 @@
       font: 17px/1.55 ui-serif, Georgia, "Times New Roman", serif;
     }
     main {
-      max-width: 36rem;
+      max-width: 38rem;
       margin: 0 auto;
       padding: 4rem 16px 3rem;
     }
     h1 {
-      font: 600 2.4rem/1.1 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font: 600 2.4rem/1.1 var(--mono);
       letter-spacing: -0.02em;
+      margin: 0 0 0.5rem;
+    }
+    h2 {
+      font: 600 1.25rem/1.25 var(--mono);
+      margin: 2.75rem 0 0.75rem;
+    }
+    h3 {
+      font: 600 1rem/1.3 var(--mono);
       margin: 0 0 0.5rem;
     }
     .status {
       display: inline-block;
-      font: 600 0.8rem/1 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font: 600 0.8rem/1 var(--mono);
       text-transform: uppercase;
       letter-spacing: 0.08em;
       border: 1.5px solid var(--fg);
       padding: 0.35rem 0.55rem;
-      margin-bottom: 2rem;
+      margin: 0 0 2rem;
     }
     p { margin: 0 0 1rem; }
+    ul, ol { margin: 0 0 1rem; padding-left: 1.4rem; }
+    li { margin-bottom: 0.35rem; }
     a { color: var(--link); text-underline-offset: 0.18em; }
+    code {
+      font: 0.85em/1.4 var(--mono);
+      overflow-wrap: anywhere;
+    }
+    pre {
+      background: var(--panel);
+      border: 1px solid var(--rule);
+      padding: 0.75rem 0.9rem;
+      margin: 0 0 1rem;
+      white-space: pre-wrap;
+    }
+    .callout {
+      border-left: 4px solid var(--fg);
+      background: var(--panel);
+      padding: 0.9rem 1rem 0.1rem;
+      margin: 0 0 1.25rem;
+    }
+    .callout ul { margin-bottom: 0.75rem; }
+    .release {
+      border: 1.5px solid var(--fg);
+      padding: 1rem 1rem 0.25rem;
+      margin: 0 0 1.25rem;
+    }
+    .release .lead { color: var(--muted); }
+    .problem {
+      border: 1.5px dashed var(--fg);
+      padding: 0.75rem 1rem;
+    }
+    esp-web-install-button { display: block; margin: 0 0 1rem; }
+    esp-web-install-button:not(:defined) { display: none; }
+    .install {
+      font: 600 0.95rem/1 var(--mono);
+      color: var(--bg);
+      background: var(--fg);
+      border: 1.5px solid var(--fg);
+      padding: 0.8rem 1.1rem;
+      cursor: pointer;
+    }
+    .install.secondary {
+      color: var(--fg);
+      background: transparent;
+    }
+    .install:hover { text-decoration: underline; text-underline-offset: 0.18em; }
+    .install:focus-visible, a:focus-visible {
+      outline: 2px solid var(--fg);
+      outline-offset: 3px;
+    }
     footer {
       margin-top: 3rem;
       padding-top: 1rem;
@@ -57,18 +120,156 @@
       color: var(--muted);
       font-size: 0.85rem;
     }
+    footer a { color: var(--muted); }
   </style>
 </head>
 <body>
   <main>
-    <h1>CrossMono</h1>
-    <div class="status">Pre-alpha · no release yet</div>
-    <p>CrossMono is reading-first, open-source firmware for the M5Stack PaperMono and PaperMono-Lite e-paper devices. It is built on <a href="https://github.com/crosspoint-reader/crosspoint-reader">CrossPoint Reader</a> and the <a href="https://github.com/Free-Ink/freeink-sdk">FreeInk SDK</a>.</p>
-    <p>There is nothing to install yet. When the first release ships, this page will have a one-click web flasher (Chrome or Edge on a computer).</p>
-    <p>Source code, plans and progress: <a href="https://github.com/nandanito/crossmono">github.com/nandanito/crossmono</a></p>
+    <header>
+      <h1>CrossMono</h1>
+      <p class="status" id="status" role="status">Checking for a release…</p>
+      <p>CrossMono is reading-first, open-source firmware for the M5Stack PaperMono and PaperMono-Lite e-paper devices. It is built on <a href="https://github.com/crosspoint-reader/crosspoint-reader">CrossPoint Reader</a> and the <a href="https://github.com/Free-Ink/freeink-sdk">FreeInk SDK</a>.</p>
+      <p>One firmware serves both models. CrossMono detects the model when it starts, and About shows it.</p>
+    </header>
+
+    <section aria-labelledby="install">
+      <h2 id="install">Install over USB</h2>
+      <p>You need <strong>Chrome or Edge on a computer</strong> and a USB-C cable that carries data. Firefox 151 or newer may also work, but it has not been tested with CrossMono. Safari, phones and tablets cannot install. On Linux, your user may need to be in the <code>dialout</code> group.</p>
+
+      <div class="callout">
+        <h3>What a USB install erases</h3>
+        <p>A USB install erases the device's internal memory. You lose:</p>
+        <ul>
+          <li>the Bluetooth pairings: pair your remote again;</li>
+          <li>the keys of protected books. LCP loans brought over from CrossPoint cannot be unlocked again on CrossMono.</li>
+        </ul>
+        <p>Your books, settings and Wi-Fi networks are on the SD card, and they stay. Later updates over Wi-Fi erase nothing.</p>
+      </div>
+
+      <div class="callout">
+        <h3>SD card: MBR only</h3>
+        <p>CrossMono reads only SD cards with an MBR partition table. It cannot read a card formatted with GPT. Most cards come with MBR. If CrossMono shows no card, copy your books off it and reformat it with MBR: for example with the SD Association's SD Card Formatter, or in Disk Utility on a Mac (View → Show All Devices, select the card, Erase, Scheme: Master Boot Record).</p>
+      </div>
+
+      <div id="releases">
+        <noscript><p class="problem">The install button needs JavaScript. Without it, use esptool (below).</p></noscript>
+
+        <div class="release" id="stable" hidden>
+          <h3>CrossMono <span class="v"></span></h3>
+          <p class="lead">The current release. <a class="notes" href="https://github.com/nandanito/crossmono/releases">Release notes</a></p>
+          <esp-web-install-button manifest="manifest.json">
+            <button slot="activate" class="install" type="button">Install CrossMono <span class="v"></span></button>
+            <span slot="unsupported"></span>
+            <span slot="not-allowed"></span>
+          </esp-web-install-button>
+        </div>
+
+        <div class="release" id="rc" hidden>
+          <h3>Test build <span class="v"></span></h3>
+          <p class="lead">A release candidate for testers. It may have bugs. Updates over Wi-Fi do not offer test builds; install the next one from this page. <a class="notes" href="https://github.com/nandanito/crossmono/releases">Release notes</a></p>
+          <esp-web-install-button manifest="manifest-rc.json">
+            <button slot="activate" class="install secondary" type="button">Install test build <span class="v"></span></button>
+            <span slot="unsupported"></span>
+            <span slot="not-allowed"></span>
+          </esp-web-install-button>
+        </div>
+
+        <div class="release" id="none" hidden>
+          <h3>No release yet</h3>
+          <p>There is nothing to install yet. The first test build will appear here. You can follow the work on <a href="https://github.com/nandanito/crossmono">GitHub</a>.</p>
+        </div>
+
+        <p class="problem" id="load-error" hidden>The release information could not be loaded. Reload the page, or use esptool (below).</p>
+        <p class="problem" id="no-serial" hidden>This browser cannot install firmware, because it has no Web Serial. Open this page in Chrome or Edge on a computer, or use esptool (below).</p>
+        <p class="problem" id="no-installer" hidden>The installer could not be loaded from unpkg.com. Reload the page, or use esptool (below).</p>
+      </div>
+
+      <h3>Steps</h3>
+      <ol>
+        <li>Wake the PaperMono and keep it awake: a sleeping device does not show up on USB. Connect it to the computer with the USB-C cable. If it is in USB drive mode, leave that mode first.</li>
+        <li>Click the install button and choose the device in the browser's list. It is usually called “USB JTAG/serial debug unit”.</li>
+        <li>Click <em>Install CrossMono</em>, then <em>Install</em>. The browser erases the device and writes CrossMono. This takes a few minutes. Keep the cable connected.</li>
+        <li>When the browser shows “Installation complete!”, the device restarts into CrossMono.</li>
+      </ol>
+      <p>If the device is not in the list, check that it is awake, then try another cable or another USB port.</p>
+    </section>
+
+    <section aria-labelledby="esptool">
+      <h2 id="esptool">Install with esptool</h2>
+      <p>Without a supported browser, use Espressif's <a href="https://docs.espressif.com/projects/esptool/en/latest/esp32s3/">esptool</a>. Download <code class="full">crossmono-&lt;version&gt;-papermono-full.bin</code> from the <a class="release-link" href="https://github.com/nandanito/crossmono/releases">release page</a>, then run:</p>
+      <pre><code>esptool --chip esp32s3 write-flash 0x0 <span class="full">crossmono-&lt;version&gt;-papermono-full.bin</span></code></pre>
+      <p>esptool 4 spells the command <code>write_flash</code>. This erases the same data as the browser install. The release page also has <code>SHA256SUMS</code> to check the download.</p>
+    </section>
+
+    <section aria-labelledby="updates">
+      <h2 id="updates">Updates</h2>
+      <p>After the first install, CrossMono updates itself over Wi-Fi: Settings → General → Check for Updates. These updates erase nothing. They do not offer test builds; install those from this page.</p>
+    </section>
+
     <footer>
-      CrossMono is independent community firmware. It is not affiliated with or supported by M5Stack. PaperMono is a product of M5Stack.
+      <p>CrossMono is independent community firmware. It is not affiliated with or supported by M5Stack. PaperMono is a product of M5Stack.</p>
+      <p><a href="https://github.com/nandanito/crossmono">Source code</a> · <a href="https://github.com/nandanito/crossmono/releases">Releases</a> · <a href="https://github.com/crosspoint-reader/crosspoint-reader">CrossPoint Reader</a> · <a href="https://github.com/Free-Ink/freeink-sdk">FreeInk SDK</a></p>
     </footer>
   </main>
+
+  <script type="module">
+    const REPO = "https://github.com/nandanito/crossmono";
+    const INSTALLER = "https://unpkg.com/esp-web-tools@10.4.0/dist/web/install-button.js";
+    const TAG = /^\d+\.\d+\.\d+(?:-rc\.[1-9]\d*)?$/;
+    const $ = (id) => document.getElementById(id);
+
+    // A channel's release: its tag ("" when the channel has none yet) and the manifest text that was read.
+    // Throws when the manifest cannot be read.
+    async function readRelease(path, candidate) {
+      const response = await fetch(path, { cache: "no-cache", signal: AbortSignal.timeout(15000) });
+      if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
+      const text = await response.text();
+      const manifest = JSON.parse(text);
+      const tag = manifest.version;
+      const usable = typeof tag === "string" && TAG.test(tag) && tag.includes("-rc.") === candidate &&
+        manifest.builds?.[0]?.parts?.length > 0;
+      return usable ? { tag, text } : { tag: "", text };
+    }
+
+    function show(section, release) {
+      section.querySelectorAll(".v").forEach((el) => { el.textContent = release.tag; });
+      section.querySelectorAll("a.notes").forEach((a) => { a.href = `${REPO}/releases/tag/${release.tag}`; });
+      // Install exactly the manifest shown, even if the channel changes while the page is open. ESP Web Tools
+      // resolves the part paths of a blob: manifest against the page, where firmware/<tag>/ is.
+      const blob = new Blob([release.text], { type: "application/json" });
+      section.querySelector("esp-web-install-button").setAttribute("manifest", URL.createObjectURL(blob));
+      section.hidden = false;
+    }
+
+    const results = await Promise.allSettled([readRelease("manifest.json", false), readRelease("manifest-rc.json", true)]);
+    const [stableRelease, candidateRelease] = results.map((r) => (r.status === "fulfilled" ? r.value : { tag: "" }));
+    const [stable, candidate] = [stableRelease.tag, candidateRelease.tag];
+    const failed = results.some((r) => r.status === "rejected");
+    results.filter((r) => r.status === "rejected").forEach((r) => console.error(r.reason));
+
+    if (stable) show($("stable"), stableRelease);
+    if (candidate) show($("rc"), candidateRelease);
+    if (failed) $("load-error").hidden = false;
+    else if (!stable && !candidate) $("none").hidden = false;
+
+    $("status").textContent = stable ? `Pre-1.0 · latest ${stable}`
+      : candidate ? `Pre-1.0 · test build ${candidate}`
+      : failed ? "Pre-1.0" : "Pre-1.0 · no release yet";
+
+    const offered = stable || candidate;
+    if (offered) {
+      document.querySelectorAll(".full").forEach((el) => { el.textContent = `crossmono-${offered}-papermono-full.bin`; });
+      document.querySelectorAll("a.release-link").forEach((a) => { a.href = `${REPO}/releases/tag/${offered}`; });
+      // Web Serial exists only in secure contexts of supporting browsers; ESP Web Tools checks the same.
+      if (!("serial" in navigator)) $("no-serial").hidden = false;
+      else {
+        import(INSTALLER).catch((err) => { console.error(err); $("no-installer").hidden = false; });
+        // A load that neither finishes nor fails would leave the cards without a button.
+        setTimeout(() => {
+          if (!customElements.get("esp-web-install-button")) $("no-installer").hidden = false;
+        }, 20000);
+      }
+    }
+  </script>
 </body>
 </html>

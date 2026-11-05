@@ -1,0 +1,50 @@
+name: Deploy site
+
+# Deploys the site to GitHub Pages (Settings → Pages → Source: GitHub Actions). Runs on every push to main.
+# publish-firmware.yml calls it after its own push, because a push made with GITHUB_TOKEN starts no workflow.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      ref:
+        description: Commit to deploy
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+
+      # Only these paths are served; CLAUDE.md, scripts/ and .github/ are not.
+      - name: Collect the site
+        run: |
+          mkdir _site
+          cp index.html manifest.json manifest-rc.json _site/
+          cp -R firmware _site/
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v5
