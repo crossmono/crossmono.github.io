@@ -1,0 +1,89 @@
+name: Publish firmware
+
+# Copies a CrossMono release into firmware/<tag>/, points manifest.json (final release) or manifest-rc.json
+# (release candidate) at it, prunes old folders (firmware/README.md), commits to main and deploys the site.
+# Run it on main after the release exists:
+#   gh workflow run publish-firmware.yml --repo crossmono/crossmono.github.io -f tag=0.1.0-rc.1
+# If the push fails because main moved during the run, run it again.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag in nandanito/crossmono, for example 0.1.0-rc.1 or 0.1.0
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-firmware
+  cancel-in-progress: false
+
+env:
+  FIRMWARE_REPO: nandanito/crossmono
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      sha: ${{ steps.commit.outputs.sha }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check the release
+        run: |
+          if ! [[ $TAG =~ ^[0-9]+\.[0-9]+\.[0-9]+(-rc\.[1-9][0-9]*)?$ ]]; then
+            echo "::error::Not a CrossMono tag: $TAG"
+            exit 1
+          fi
+          info=$(gh release view "$TAG" --repo "$FIRMWARE_REPO" --json isDraft,isPrerelease \
+            --jq '"\(.isDraft) \(.isPrerelease)"')
+          if [[ $TAG == *-rc.* ]]; then want="false true"; else want="false false"; fi
+          if [ "$info" != "$want" ]; then
+            echo "::error::$TAG: draft and pre-release are \"$info\", expected \"$want\""
+            exit 1
+          fi
+
+      - name: Download the assets
+        run: |
+          gh release download "$TAG" --repo "$FIRMWARE_REPO" --dir "$RUNNER_TEMP/release" \
+            --pattern "crossmono-$TAG-papermono-full.bin" --pattern manifest.json --pattern SHA256SUMS
+
+      - name: Write the folder and the manifests
+        run: scripts/publish-firmware.sh "$TAG" "$RUNNER_TEMP/release"
+
+      - name: Commit and push
+        id: commit
+        run: |
+          git add -A manifest.json manifest-rc.json firmware
+          if git diff --cached --quiet; then
+            echo "Nothing changed."
+          else
+            git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -m "chore: publish firmware $TAG"
+            git push origin HEAD:main
+          fi
+          echo "sha=$(git rev-parse HEAD)" >>"$GITHUB_OUTPUT"
+
+  deploy:
+    needs: publish
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/pages.yml
+    with:
+      ref: ${{ needs.publish.outputs.sha }}
