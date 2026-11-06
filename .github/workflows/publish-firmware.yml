@@ -59,7 +59,8 @@ jobs:
       - name: Download the assets
         run: |
           gh release download "$TAG" --repo "$FIRMWARE_REPO" --dir "$RUNNER_TEMP/release" \
-            --pattern "crossmono-$TAG-papermono-full.bin" --pattern manifest.json --pattern SHA256SUMS
+            --pattern "crossmono-$TAG-papermono-full.bin" --pattern manifest.json --pattern SHA256SUMS \
+            --pattern "crossmono-$TAG-LICENSE.txt"
 
       - name: Write the folder and the manifests
         run: scripts/publish-firmware.sh "$TAG" "$RUNNER_TEMP/release"

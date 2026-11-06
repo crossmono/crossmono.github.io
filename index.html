@@ -156,7 +156,7 @@
 
         <div class="release" id="stable" hidden>
           <h3>CrossMono <span class="v"></span></h3>
-          <p class="lead">The current release. <a class="notes" href="https://github.com/nandanito/crossmono/releases">Release notes</a></p>
+          <p class="lead">The current release. <a class="notes" href="https://github.com/nandanito/crossmono/releases">Release notes</a> · <a class="licence" href="https://github.com/nandanito/crossmono/blob/main/THIRD-PARTY-NOTICES">Licences</a></p>
           <esp-web-install-button manifest="manifest.json">
             <button slot="activate" class="install" type="button">Install CrossMono <span class="v"></span></button>
             <span slot="unsupported"></span>
@@ -166,7 +166,7 @@
 
         <div class="release" id="rc" hidden>
           <h3>Test build <span class="v"></span></h3>
-          <p class="lead">A release candidate for testers. It may have bugs. Updates over Wi-Fi do not offer test builds; install the next one from this page. <a class="notes" href="https://github.com/nandanito/crossmono/releases">Release notes</a></p>
+          <p class="lead">A release candidate for testers. It may have bugs. Updates over Wi-Fi do not offer test builds; install the next one from this page. <a class="notes" href="https://github.com/nandanito/crossmono/releases">Release notes</a> · <a class="licence" href="https://github.com/nandanito/crossmono/blob/main/THIRD-PARTY-NOTICES">Licences</a></p>
           <esp-web-install-button manifest="manifest-rc.json">
             <button slot="activate" class="install secondary" type="button">Install test build <span class="v"></span></button>
             <span slot="unsupported"></span>
@@ -208,6 +208,7 @@
 
     <footer>
       <p>CrossMono is independent community firmware. It is not affiliated with or supported by M5Stack. PaperMono is a product of M5Stack.</p>
+      <p>CrossMono's and CrossPoint's code is MIT. The firmware image as a whole is distributed under the GNU GPL version 3, because it includes wolfSSL. <a class="licence-file" href="https://github.com/nandanito/crossmono/blob/main/THIRD-PARTY-NOTICES">Licences and source</a></p>
       <p><a href="https://github.com/nandanito/crossmono">Source code</a> · <a href="https://github.com/nandanito/crossmono/releases">Releases</a> · <a href="https://github.com/crosspoint-reader/crosspoint-reader">CrossPoint Reader</a> · <a href="https://github.com/Free-Ink/freeink-sdk">FreeInk SDK</a></p>
     </footer>
   </main>
@@ -231,9 +232,13 @@
       return usable ? { tag, text } : { tag: "", text };
     }
 
+    // Every release's licence file is served beside its image (firmware/README.md).
+    const licenceFile = (tag) => `firmware/${tag}/crossmono-${tag}-LICENSE.txt`;
+
     function show(section, release) {
       section.querySelectorAll(".v").forEach((el) => { el.textContent = release.tag; });
       section.querySelectorAll("a.notes").forEach((a) => { a.href = `${REPO}/releases/tag/${release.tag}`; });
+      section.querySelectorAll("a.licence").forEach((a) => { a.href = licenceFile(release.tag); });
       // Install exactly the manifest shown, even if the channel changes while the page is open. ESP Web Tools
       // resolves the part paths of a blob: manifest against the page, where firmware/<tag>/ is.
       const blob = new Blob([release.text], { type: "application/json" });
@@ -260,6 +265,7 @@
     if (offered) {
       document.querySelectorAll(".full").forEach((el) => { el.textContent = `crossmono-${offered}-papermono-full.bin`; });
       document.querySelectorAll("a.release-link").forEach((a) => { a.href = `${REPO}/releases/tag/${offered}`; });
+      document.querySelectorAll("a.licence-file").forEach((a) => { a.href = licenceFile(offered); });
       // Web Serial exists only in secure contexts of supporting browsers; ESP Web Tools checks the same.
       if (!("serial" in navigator)) $("no-serial").hidden = false;
       else {

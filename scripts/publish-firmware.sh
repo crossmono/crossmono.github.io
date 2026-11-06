@@ -5,7 +5,8 @@
 # point at the previous folders; they go on the next run.
 #
 # Usage, from the site root: scripts/publish-firmware.sh <tag> <dir>
-# <dir> holds the release assets crossmono-<tag>-papermono-full.bin, manifest.json and SHA256SUMS.
+# <dir> holds the release assets crossmono-<tag>-papermono-full.bin, manifest.json,
+# crossmono-<tag>-LICENSE.txt (every licence of the image, linked from the page) and SHA256SUMS.
 # The publish-firmware workflow downloads them, runs this script, and commits the result.
 set -euo pipefail
 
@@ -25,13 +26,14 @@ tag_re='^[0-9]+\.[0-9]+\.[0-9]+(-rc\.[1-9][0-9]*)?$'
 [ -d firmware ] || die "run this from the site root"
 
 full="crossmono-$tag-papermono-full.bin"
-for name in "$full" manifest.json SHA256SUMS; do
+license="crossmono-$tag-LICENSE.txt"
+for name in "$full" manifest.json "$license" SHA256SUMS; do
   [ -f "$src/$name" ] || die "missing $src/$name"
 done
 
 # SHA256SUMS also lists the OTA image and the ELF, which the site does not need.
-sums=$(awk -v a="$full" -v b=manifest.json '$2 == a || $2 == b' "$src/SHA256SUMS")
-[ "$(printf '%s\n' "$sums" | grep -c .)" -eq 2 ] || die "SHA256SUMS must list $full and manifest.json once each"
+sums=$(awk -v a="$full" -v b=manifest.json -v c="$license" '$2 == a || $2 == b || $2 == c' "$src/SHA256SUMS")
+[ "$(printf '%s\n' "$sums" | grep -c .)" -eq 3 ] || die "SHA256SUMS must list $full, manifest.json and $license once each"
 if command -v sha256sum >/dev/null; then
   sha256=(sha256sum)
 else
@@ -76,7 +78,7 @@ fi
 dest="firmware/$tag"
 rm -rf "$dest"
 mkdir -p "$dest"
-cp "$src/$full" "$src/manifest.json" "$src/SHA256SUMS" "$dest/"
+cp "$src/$full" "$src/manifest.json" "$src/$license" "$src/SHA256SUMS" "$dest/"
 
 # The part path in the release manifest is relative to it; from the site root it is under $dest.
 # Each manifest is written to a temporary file first, so a failed jq leaves the old one in place.
