@@ -9,7 +9,7 @@ ADR 0009 for install). Where this file says nothing, those rules apply. Maintain
 
 - `index.html`: the whole page, no build step. ESP Web Tools is loaded from unpkg at an exact version.
 - `manifest.json` (stable) and `manifest-rc.json` (test build): what the install buttons use.
-  `firmware/<tag>/`: the full image, the release manifest and `SHA256SUMS`. See [firmware/README.md](firmware/README.md).
+  `firmware/<tag>/`: the full image, the release manifest, the licence file and `SHA256SUMS`. See [firmware/README.md](firmware/README.md).
 - `.github/workflows/pages.yml` deploys the site on every push to `main`. Only `index.html`, the two manifests and
   `firmware/` are served; a new file to serve must be added to its "Collect the site" step.
 - `.github/workflows/publish-firmware.yml` (run by hand with a tag) copies a release into `firmware/<tag>/`,
