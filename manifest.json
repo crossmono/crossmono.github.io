@@ -1,5 +1,16 @@
 {
   "name": "CrossMono",
-  "version": "",
-  "builds": []
+  "version": "0.1.0",
+  "new_install_improv_wait_time": 0,
+  "builds": [
+    {
+      "chipFamily": "ESP32-S3",
+      "parts": [
+        {
+          "path": "firmware/0.1.0/crossmono-0.1.0-papermono-full.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
 }
