@@ -1,11 +1,11 @@
-CrossMono 0.1.0-rc.1 firmware licences
+CrossMono 0.2.0-rc.1 firmware licences
 ======================================
 
-Release: 0.1.0-rc.1
-Source commit: 62f8bb6fe4062e00eba79624b633372ce296a053
+Release: 0.2.0-rc.1
+Source commit: fb9054bdffe6c86f7e43867f1867c14b55b9d3f1
 FreeInk SDK commit: 5e94fe7480f019c89fbf691aef87523eb1b46704
 Build environment: papermono-gh_release_rc
-Source: https://github.com/nandanito/crossmono/tree/62f8bb6fe4062e00eba79624b633372ce296a053
+Source: https://github.com/nandanito/crossmono/tree/fb9054bdffe6c86f7e43867f1867c14b55b9d3f1
 SDK source: https://github.com/Free-Ink/freeink-sdk/tree/5e94fe7480f019c89fbf691aef87523eb1b46704
 
 CrossMono's and CrossPoint's own code is under the MIT licence (LICENSE, below).
