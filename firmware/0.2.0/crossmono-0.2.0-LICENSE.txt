@@ -1,12 +1,12 @@
-CrossMono 0.2.0-rc.1 firmware licences
-======================================
+CrossMono 0.2.0 firmware licences
+=================================
 
-Release: 0.2.0-rc.1
-Source commit: fb9054bdffe6c86f7e43867f1867c14b55b9d3f1
-FreeInk SDK commit: 5e94fe7480f019c89fbf691aef87523eb1b46704
-Build environment: papermono-gh_release_rc
-Source: https://github.com/nandanito/crossmono/tree/fb9054bdffe6c86f7e43867f1867c14b55b9d3f1
-SDK source: https://github.com/Free-Ink/freeink-sdk/tree/5e94fe7480f019c89fbf691aef87523eb1b46704
+Release: 0.2.0
+Source commit: fb6931ea97031db0e3f669f9c3a34b89f97f547a
+FreeInk SDK commit: 6a208c0c46cce99bafa334bc4f171f5e558c5195
+Build environment: papermono-gh_release
+Source: https://github.com/nandanito/crossmono/tree/fb6931ea97031db0e3f669f9c3a34b89f97f547a
+SDK source: https://github.com/Free-Ink/freeink-sdk/tree/6a208c0c46cce99bafa334bc4f171f5e558c5195
 
 CrossMono's and CrossPoint's own code is under the MIT licence (LICENSE, below).
 Third-party code, fonts and data keep their own licences (THIRD-PARTY-NOTICES, below).
@@ -62,8 +62,8 @@ their licences and where to find each licence text. Each release also has the
 asset crossmono-<version>-LICENSE.txt, which holds this file and the full text
 of every licence named here (section 2).
 
-Checked for CrossMono 0.1.0: CrossPoint base 2.0.0 (42d58daa), FreeInk SDK
-5e94fe7, platform pioarduino 55.03.311, build environment papermono-gh_release.
+Checked for CrossMono 0.2.0: CrossPoint base 2.0.0 (42d58daa), FreeInk SDK
+6a208c0, platform pioarduino 55.03.311, build environment papermono-gh_release.
 Paths are relative to the repository root. Paths under .pio/libdeps/ exist
 after a build; the libraries come from the sources named in platformio.ini.
 
